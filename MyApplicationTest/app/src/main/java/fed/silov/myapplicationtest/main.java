@@ -125,7 +125,7 @@ public class main extends AppCompatActivity {
     }
     public void HoopGesture(Vector vector){
         if(play==true) {
-            // поиск пустой клетк
+            // поиск пустой клетки
             int x = -1, y = -1;
             //Toast.makeText(this, "Ищем 0", Toast.LENGTH_SHORT).show();
             for (int i = 0; i < 4; i++)
@@ -159,6 +159,7 @@ public class main extends AppCompatActivity {
                         Set(y+1, x, y, x);
                     break;
             }
+            onPause();
         }
     }
     public void generateNewField(){
@@ -299,7 +300,7 @@ public class main extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        // Запоминаем данные
+        // Запоминаем состояние игры
         SharedPreferences.Editor editor = mSettings.edit();
         int[] field=new int[16];
         for(int i=0; i<16; i++){
@@ -308,33 +309,31 @@ public class main extends AppCompatActivity {
             else
                 field[i]=Integer.parseInt(fieldButtons[i/4][i%4].getText().toString());
         }
-        editor.putInt(KEY_COUNT, countHoop);
-        editor.putInt(KEY_RECORD, record);
+        editor.putInt(KEY_COUNT, countHoop); // запись числа ходов
+        editor.putInt(KEY_RECORD, record); // запись рекорда
         for(int i=0; i<16; i++){
-            editor.putInt(KEY_CURE_FIELD + i, field[i]);
-            editor.putInt(KEY_LAST_FIELD + i, lastField[i]);
+            editor.putInt(KEY_CURE_FIELD + i, field[i]); // запись текущего состояния игрового поля
+            editor.putInt(KEY_LAST_FIELD + i, lastField[i]); // запись последнего сгенерированного поля
         }
-        editor.putString(KEY_TEXT, gameProgress.getText().toString());
-        editor.putBoolean(KEY_PLAY, play);
-        editor.putInt(KEY_RECORD, record);
+        editor.putString(KEY_TEXT, gameProgress.getText().toString()); // запись строки с игровым прогрессом
+        editor.putBoolean(KEY_PLAY, play); // Начата ли игра
         editor.apply();
     }
     @Override
     protected void onResume() {
         super.onResume();
         if (mSettings.contains(KEY_RECORD)) {
-            // Получаем число из настроек
-
-            play = mSettings.getBoolean(KEY_PLAY,false);
+            // Получаем данные из настроек
+            play = mSettings.getBoolean(KEY_PLAY,false); // получаем информацию о текущей игре
             gameProgress.setText(mSettings.getString(KEY_TEXT,"Нажмите Новая игра"));
-            countHoop = mSettings.getInt(KEY_COUNT, 0);
-            record=mSettings.getInt(KEY_RECORD,0);
+            countHoop = mSettings.getInt(KEY_COUNT, 0); // число ходов
+            record=mSettings.getInt(KEY_RECORD,0); // рекорд
             recordView.setText("Рекорд: "+record);
             int[] field=new int[16];
             lastField=new int[16];
             for(int i=0; i<16; i++){
-                lastField[i]=mSettings.getInt(KEY_LAST_FIELD+i,0);
-                field[i]=mSettings.getInt(KEY_CURE_FIELD+i,0);
+                lastField[i]=mSettings.getInt(KEY_LAST_FIELD+i,0); // поле, к которому откатиться в случае "переиграть"
+                field[i]=mSettings.getInt(KEY_CURE_FIELD+i,0); // поле, на котором закончилась игра
             }
             for(int i=0; i<16; i++){
                 if(field[i]==0)
@@ -343,8 +342,6 @@ public class main extends AppCompatActivity {
                     fieldButtons[i/4][i%4].setText(""+field[i]);
             }
 
-            record = mSettings.getInt(KEY_RECORD, 0);
-            recordView.setText("Рекорд: "+record);
         }
         else
             newGame();
